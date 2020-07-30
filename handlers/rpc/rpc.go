@@ -3,6 +3,7 @@ package rpc
 import (
 	"log"
 	"net"
+	"sync"
 
 	"github.com/abdukahhor/streamer/app"
 	"github.com/abdukahhor/streamer/handlers/pb"
@@ -44,17 +45,21 @@ func Close() {
 }
 
 func (s *server) GetRandomDataStream(in *empty.Empty, srv pb.Streamer_GetRandomDataStreamServer) error {
+	var wg sync.WaitGroup
 	for i := 0; i < s.numberOfRequests; i++ {
+		wg.Add(1)
 		go func(sv pb.Streamer_GetRandomDataStreamServer, c *app.Core) {
+			defer wg.Done()
 			url, data, err := c.GetURL(sv.Context())
 			if err != nil {
-				log.Println(err)
+				log.Println("c.GetURL", err)
 			}
 			err = sv.Send(&pb.Response{Url: url, Data: data})
 			if err != nil {
-				log.Println(err)
+				log.Println("sv.Send", err)
 			}
 		}(srv, s.core)
 	}
+	wg.Wait()
 	return nil
 }

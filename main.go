@@ -16,7 +16,7 @@ import (
 func main() {
 	var (
 		addr      = flag.String("addr", ":9090", "ip:port of server")
-		redisAddr = flag.String("redis", "localhost:6379", "Folder path of the embedded database")
+		redisAddr = flag.String("redis", ":6379", "Folder path of the embedded database")
 	)
 	flag.Parse()
 	var cfg models.Config
@@ -26,6 +26,7 @@ func main() {
 	}
 	cfg.Ln = len(cfg.URLs)
 	cache, err := rdb.Connect(*redisAddr, 20)
+	defer cache.Close()
 	if err != nil {
 		log.Fatalln(err)
 	}
