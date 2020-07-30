@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -13,13 +14,18 @@ import (
 )
 
 func main() {
+	var (
+		addr      = flag.String("addr", ":9090", "ip:port of server")
+		redisAddr = flag.String("redis", "localhost:6379", "Folder path of the embedded database")
+	)
+	flag.Parse()
 	var cfg models.Config
 	err := cfg.Get("./config.yml")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	cfg.Ln = len(cfg.URLs)
-	cache, err := rdb.Connect(":6363", 20)
+	cache, err := rdb.Connect(*redisAddr, 20)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -34,9 +40,9 @@ func main() {
 		os.Exit(0)
 	}()
 
-	log.Println("server started at ", ":9090")
+	log.Println("server started at ", *addr)
 	//serve rpc
-	err = rpc.Run(":9090")
+	err = rpc.Run(*addr)
 	if err != nil {
 		log.Fatalln(err)
 	}
