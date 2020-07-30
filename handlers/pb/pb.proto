@@ -1,0 +1,15 @@
+
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package pb;
+
+service Streamer {
+    rpc GetRandomDataStream (google.protobuf.Empty) returns (stream Response);
+}
+
+message Response {
+    string url = 1;
+    string data = 2;
+}
+//export PATH="$PATH:$(go env GOPATH)/bin"
+//protoc --go_out=plugins=grpc:. pb.proto
